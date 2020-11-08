@@ -2,7 +2,8 @@ const express = require('express'),
 	  router  = express.Router({mergeParams: true}),
 	  db      = require('../models'),
 	  bcrypt  = require('bcrypt'),
-	  isUserLoggedin = require('../middleware/auth');
+	  isUserLoggedin = require('../middleware/auth'),
+	  jwt     = require('jsonwebtoken');
 
 router.post('/signup', async function(req, res) {
 	try {

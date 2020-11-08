@@ -6,7 +6,7 @@ function isUserLoggedIn(req, res, next){
 			return res.json({message: 'Your token is invalid'});
 		}
 		if(Date.now()/1000 - decoded.iat > 3600) {
-			return res.json({message: 'Your token is valid, but is has expired'});
+			return res.json({message: 'Your token has expired'});
 		}
 		next();
 	});
@@ -21,4 +21,4 @@ function doesUserOwnResource(req, res, next){
 	});
 }
 
-module.exports = isUserLoggedIn;
+module.exports = {isUserLoggedIn, doesUserOwnResource};
