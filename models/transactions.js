@@ -18,7 +18,15 @@ const transactionSchema = new mongoose.Schema({
 		type: Date,
 		default: Date.now
 	},
-	counterparty: {
+	receivingAccount: {
+		type: String,
+		required: true
+	},
+	receivingRouting: {
+		type: String,
+		required: true
+	},
+	transactionType: {
 		type: String,
 		required: true
 	}

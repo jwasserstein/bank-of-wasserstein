@@ -11,4 +11,4 @@ app.use(bodyParser.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/transactions/:userId', transactionRoutes);
 
-app.listen(3000, () => console.log('Listening on port 3000'));
+app.listen(3001, () => console.log('Listening on port 3001'));
