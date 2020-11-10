@@ -43,15 +43,29 @@ router.delete('/:transactionId', isUserLoggedIn, doesUserOwnResource, async func
 
 router.post('/generate/:num', isUserLoggedIn, doesUserOwnResource, async function(req, res){
 	try {
+		const existingTransactions = (await db.Users.findById(req.params.userId).populate('transactions').exec()).transactions;
+		let lastTransaction = {transactionNumber: -1, accountBalance: 0};
+		if(existingTransactions.length > 0){
+			lastTransaction = existingTransactions.reduce((acc, next) => next.transactionNumber > acc.transactionNumber ? next : acc);
+		}
+		
 		let transactions = [];
+		let cumulativeNewAmount = 0;
 		for(let i = 0; i < req.params.num; i++){
+			let amount = +(faker.finance.amount().toFixed(2));
+			const description = faker.finance.transactionDescription();
+			if(description.split(' ')[0] !== 'deposit'){
+				amount = amount * -1;
+			}
+			cumulativeNewAmount += amount;
 			transactions.push({
 				user: req.params.userId,
-				description: faker.finance.transactionDescription(),
-				amount: faker.finance.amount(),
-				transactionType: faker.finance.transactionType(),
+				description: description,
+				amount: amount,
 				receivingAccount: faker.finance.account(),
-				receivingRouting: faker.finance.routingNumber()
+				receivingRouting: faker.finance.routingNumber(),
+				transactionNumber: lastTransaction.transactionNumber + i + 1,
+				accountBalance: +(lastTransaction.accountBalance + cumulativeNewAmount).toFixed(2)
 			});
 		}
 		transactions = await db.Transactions.create(transactions);
