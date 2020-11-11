@@ -60,7 +60,7 @@ router.post('/generate/:num', isUserLoggedIn, doesUserOwnResource, async functio
 			cumulativeNewAmount += amount;
 			transactions.push({
 				user: req.params.userId,
-				description: description,
+				description: description.split(' using ')[0],
 				amount: amount,
 				receivingAccount: faker.finance.account(),
 				receivingRouting: faker.finance.routingNumber(),
