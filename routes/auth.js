@@ -8,7 +8,17 @@ const express = require('express'),
 router.post('/signup', async function(req, res) {
 	try {
 		const user = await db.Users.create(req.body);
-		res.json({user});
+		const token = jwt.sign({
+			id: user._id,
+			username: user.username,
+			email: user.email
+		}, process.env.SECRET_KEY);
+		res.json({
+			id: user._id,
+			username: user.username,
+			email: user.email,
+			token
+		});
 	} catch (err) {
 		res.json({error: err.message});
 	}
