@@ -27,6 +27,9 @@ router.post('/signup', async function(req, res) {
 router.post('/signin', async function (req, res) {
 	try {
 		const user = await db.Users.findOne({username: req.body.username});
+		if(!user){
+			return res.json({error: 'Invalid username/password'});
+		}
 		const isMatch = await bcrypt.compare(req.body.password, user.password);
 		if(isMatch){
 			const token = jwt.sign({
