@@ -13,14 +13,14 @@ router.post('/signup', async function(req, res) {
 			username: user.username,
 			email: user.email
 		}, process.env.SECRET_KEY);
-		res.json({
+		res.status(201).json({
 			id: user._id,
 			username: user.username,
 			email: user.email,
 			token
 		});
 	} catch (err) {
-		res.json({error: err.message});
+		res.status(500).json({error: err.message});
 	}
 });
 
@@ -28,7 +28,7 @@ router.post('/signin', async function (req, res) {
 	try {
 		const user = await db.Users.findOne({username: req.body.username});
 		if(!user){
-			return res.json({error: 'Invalid username/password'});
+			return res.status(401).json({error: 'Invalid username/password'});
 		}
 		const isMatch = await bcrypt.compare(req.body.password, user.password);
 		if(isMatch){
@@ -44,10 +44,10 @@ router.post('/signin', async function (req, res) {
 				token
 			});
 		} else {
-			res.json({error: 'Invalid username/password'});
+			res.status(401).json({error: 'Invalid username/password'});
 		}
 	} catch (err) {
-		res.json({error: err.message});
+		res.status(500).json({error: err.message});
 	}
 });
 

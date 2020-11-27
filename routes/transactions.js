@@ -9,16 +9,16 @@ router.get('/', isUserLoggedIn, doesUserOwnResource, async function(req, res){
 		const user = await db.Users.findById(req.params.userId).populate('transactions').exec();
 		res.json(user.transactions);
 	} catch(err) {
-		res.json({message: err.message});
+		res.status(500).json({message: err.message});
 	}
 });
 
 router.post('/', isUserLoggedIn, doesUserOwnResource, async function(req, res){
 	try {
 		const transaction = await db.Transactions.create({user: req.params.userId, ...req.body});
-		res.json(transaction);
+		res.status(201).json(transaction);
 	} catch(err) {
-		res.json({message: err.message});
+		res.status(500).json({message: err.message});
 	}
 });
 
@@ -27,7 +27,7 @@ router.get('/:transactionId', isUserLoggedIn, doesUserOwnResource, async functio
 		const transaction = await db.Transactions.findById(req.params.transactionId);
 		res.json(transaction);
 	} catch(err) {
-		res.json({message: err.message});
+		res.status(500).json({message: err.message});
 	}
 });
 
@@ -37,7 +37,7 @@ router.delete('/:transactionId', isUserLoggedIn, doesUserOwnResource, async func
 		transaction.remove();
 		res.json(transaction);
 	} catch(err) {
-		res.json({message: err.message});
+		res.status(500).json({message: err.message});
 	}
 });
 
@@ -69,9 +69,9 @@ router.post('/generate/:num', isUserLoggedIn, doesUserOwnResource, async functio
 			});
 		}
 		transactions = await db.Transactions.create(transactions);
-		res.json(transactions);
+		res.status(201).json(transactions);
 	} catch(err) {
-		res.json({message: err.message});
+		res.status(500).json({message: err.message});
 	}
 });
 
