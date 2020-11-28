@@ -23,14 +23,14 @@ router.post('/signup', async function(req, res) {
 			username: user.username,
 			email: user.email
 		}, process.env.SECRET_KEY);
-		res.status(201).json({
+		return res.status(201).json({
 			id: user._id,
 			username: user.username,
 			email: user.email,
 			token
 		});
 	} catch (err) {
-		res.status(500).json({error: err.message});
+		return res.status(500).json({error: err.message});
 	}
 });
 
@@ -54,17 +54,17 @@ router.post('/signin', async function (req, res) {
 				username: user.username,
 				email: user.email
 			}, process.env.SECRET_KEY);
-			res.json({
+			return res.json({
 				id: user._id,
 				username: user.username,
 				email: user.email,
 				token
 			});
 		} else {
-			res.status(401).json({error: 'Incorrect password'});
+			return res.status(401).json({error: 'Incorrect password'});
 		}
 	} catch (err) {
-		res.status(500).json({error: err.message});
+		return res.status(500).json({error: err.message});
 	}
 });
 
