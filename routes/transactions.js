@@ -7,27 +7,27 @@ const express = require('express'),
 router.get('/', isUserLoggedIn, doesUserOwnResource, async function(req, res){
 	try {
 		const user = await db.Users.findById(req.params.userId).populate('transactions').exec();
-		res.json(user.transactions);
+		return res.json(user.transactions);
 	} catch(err) {
-		res.status(500).json({message: err.message});
+		return res.status(500).json({error: err.message});
 	}
 });
 
 router.post('/', isUserLoggedIn, doesUserOwnResource, async function(req, res){
 	try {
 		const transaction = await db.Transactions.create({user: req.params.userId, ...req.body});
-		res.status(201).json(transaction);
+		return res.status(201).json(transaction);
 	} catch(err) {
-		res.status(500).json({message: err.message});
+		return res.status(500).json({error: err.message});
 	}
 });
 
 router.get('/:transactionId', isUserLoggedIn, doesUserOwnResource, async function(req, res){
 	try {
 		const transaction = await db.Transactions.findById(req.params.transactionId);
-		res.json(transaction);
+		return res.json(transaction);
 	} catch(err) {
-		res.status(500).json({message: err.message});
+		return res.status(500).json({error: err.message});
 	}
 });
 
@@ -35,9 +35,9 @@ router.delete('/:transactionId', isUserLoggedIn, doesUserOwnResource, async func
 	try {
 		const transaction = await db.Transactions.findById(req.params.transactionId);
 		transaction.remove();
-		res.json(transaction);
+		return res.json(transaction);
 	} catch(err) {
-		res.status(500).json({message: err.message});
+		return res.status(500).json({error: err.message});
 	}
 });
 
@@ -69,9 +69,9 @@ router.post('/generate/:num', isUserLoggedIn, doesUserOwnResource, async functio
 			});
 		}
 		transactions = await db.Transactions.create(transactions);
-		res.status(201).json(transactions);
+		return res.status(201).json(transactions);
 	} catch(err) {
-		res.status(500).json({message: err.message});
+		return res.status(500).json({error: err.message});
 	}
 });
 
