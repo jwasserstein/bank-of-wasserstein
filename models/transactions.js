@@ -42,9 +42,9 @@ transactionSchema.pre('save', async function(next){
 		const user = await Users.findById(this.user);
 		user.transactions.push(this._id);
 		await user.save();
-		next();
+		return next();
 	} catch(err) {
-		console.log(err);
+		return next(err);
 	}
 });
 
@@ -53,9 +53,9 @@ transactionSchema.pre('remove', async function(next){
 		const user = await Users.findById(this.user);
 		user.transactions = user.transactions.filter(t => t != this.id);
 		await user.save();
-		next();
+		return next();
 	} catch(err) {
-		console.log(err);
+		return next(err);
 	}
 });
 
