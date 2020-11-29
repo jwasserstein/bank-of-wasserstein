@@ -18,11 +18,7 @@ const transactionSchema = new mongoose.Schema({
 		type: Date,
 		default: Date.now
 	},
-	receivingAccount: {
-		type: String,
-		required: true
-	},
-	receivingRouting: {
+	recipient: {
 		type: String,
 		required: true
 	},
