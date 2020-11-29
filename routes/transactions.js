@@ -30,7 +30,7 @@ router.post('/', isUserLoggedIn, doesUserOwnResource, async function(req, res){
 			transactionNumber: lastTransaction.transactionNumber + 1,
 			accountBalance: lastTransaction.accountBalance + (+req.body.amount)
 		});
-		return res.status(201).json(transaction);
+		return res.status(201).json([...user.transactions, transaction]);
 	} catch(err) {
 		return res.status(500).json({error: err.message});
 	}
@@ -85,7 +85,7 @@ router.post('/generate/:num', isUserLoggedIn, doesUserOwnResource, async functio
 			});
 		}
 		transactions = await db.Transactions.create(transactions);
-		return res.status(201).json(transactions);
+		return res.status(201).json([...user.transactions, ...transactions]);
 	} catch(err) {
 		return res.status(500).json({error: err.message});
 	}
