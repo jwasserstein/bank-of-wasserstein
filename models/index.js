@@ -3,5 +3,6 @@ const mongoose = require('mongoose'),
 	  Transactions = require('./transactions');
 
 mongoose.connect('mongodb://localhost/bank-of-wasserstein', {useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false, keepAlive: true});
+mongoose.set('useCreateIndex', true);
 
 module.exports = {Users, Transactions};
