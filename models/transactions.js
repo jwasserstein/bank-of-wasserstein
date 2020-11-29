@@ -28,8 +28,7 @@ const transactionSchema = new mongoose.Schema({
 	},
 	transactionNumber: {
 		type: Number,
-		required: true,
-		unique: true
+		required: true
 	},
 	accountBalance: {
 		type: Number,
