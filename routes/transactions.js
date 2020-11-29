@@ -15,7 +15,21 @@ router.get('/', isUserLoggedIn, doesUserOwnResource, async function(req, res){
 
 router.post('/', isUserLoggedIn, doesUserOwnResource, async function(req, res){
 	try {
-		const transaction = await db.Transactions.create({user: req.params.userId, ...req.body});
+		const user = await db.Users.findById(req.params.userId).populate('transactions').exec();
+		
+		let lastTransaction;
+		if(user.transactions.length){
+			lastTransaction = user.transactions.reduce((acc, next) => next.transactionNumber > acc.transactionNumber ? next : acc);
+		} else {
+			lastTransaction = {transactionNumber: -1, accountBalance: 0};
+		}
+			
+		const transaction = await db.Transactions.create({
+			...req.body, 
+			user: req.params.userId, 
+			transactionNumber: lastTransaction.transactionNumber + 1,
+			accountBalance: lastTransaction.accountBalance + (+req.body.amount)
+		});
 		return res.status(201).json(transaction);
 	} catch(err) {
 		return res.status(500).json({error: err.message});
@@ -43,10 +57,12 @@ router.delete('/:transactionId', isUserLoggedIn, doesUserOwnResource, async func
 
 router.post('/generate/:num', isUserLoggedIn, doesUserOwnResource, async function(req, res){
 	try {
-		const existingTransactions = (await db.Users.findById(req.params.userId).populate('transactions').exec()).transactions;
-		let lastTransaction = {transactionNumber: -1, accountBalance: 0};
-		if(existingTransactions.length > 0){
-			lastTransaction = existingTransactions.reduce((acc, next) => next.transactionNumber > acc.transactionNumber ? next : acc);
+		const user = await db.Users.findById(req.params.userId).populate('transactions').exec();
+		let lastTransaction; 
+		if(user.transactions.length){
+			lastTransaction = user.transactions.reduce((acc, next) => next.transactionNumber > acc.transactionNumber ? next : acc);
+		} else {
+			lastTransaction = {transactionNumber: -1, accountBalance: 0};
 		}
 		
 		let transactions = [];
