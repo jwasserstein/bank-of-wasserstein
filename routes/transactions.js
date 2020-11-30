@@ -68,18 +68,16 @@ router.post('/generate/:num', isUserLoggedIn, doesUserOwnResource, async functio
 		let transactions = [];
 		let cumulativeNewAmount = 0;
 		for(let i = 0; i < req.params.num; i++){
-			let amount = +(faker.finance.amount().toFixed(2));
-			const description = faker.finance.transactionDescription();
-			if(description.split(' ')[0] !== 'deposit'){
-				amount = amount * -1;
-			}
+			const amount = +(Math.random()*2000-700).toFixed(2);
+			const counterparty = faker.finance.transactionDescription().match(/at (.*) using/)[1];
+			const description = amount >= 0 ? 'Payment from ' + counterparty : 'Payment to ' + counterparty;
+
 			cumulativeNewAmount += amount;
 			transactions.push({
 				user: req.params.userId,
-				description: description.split(' using ')[0],
+				description: description,
 				amount: amount,
-				receivingAccount: faker.finance.account(),
-				receivingRouting: faker.finance.routingNumber(),
+				counterparty: counterparty,
 				transactionNumber: lastTransaction.transactionNumber + i + 1,
 				accountBalance: +(lastTransaction.accountBalance + cumulativeNewAmount).toFixed(2)
 			});

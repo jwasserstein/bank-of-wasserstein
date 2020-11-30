@@ -18,7 +18,7 @@ const transactionSchema = new mongoose.Schema({
 		type: Date,
 		default: Date.now
 	},
-	recipient: {
+	counterparty: {
 		type: String,
 		required: true
 	},
