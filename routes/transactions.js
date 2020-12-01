@@ -4,6 +4,16 @@ const express = require('express'),
 	  {isUserLoggedIn, doesUserOwnResource} = require('../middleware/auth'),
 	  faker   = require('faker');
 
+function checkMissingFields(body, requiredFields){
+	const missingFields = [];
+	for(let i of requiredFields){
+		if(!(i in body)){
+			missingFields.push(i);
+		}
+	}
+	return missingFields;
+}
+
 router.get('/', isUserLoggedIn, doesUserOwnResource, async function(req, res){
 	try {
 		const user = await db.Users.findById(req.params.userId).populate('transactions').exec();
@@ -15,18 +25,48 @@ router.get('/', isUserLoggedIn, doesUserOwnResource, async function(req, res){
 
 router.post('/', isUserLoggedIn, doesUserOwnResource, async function(req, res){
 	try {
+		const missingFields = checkMissingFields(req.body, ['amount', 'counterparty', 'type', 'description']);
+		if(missingFields.length){
+			return res.status(400).json({error: 'Missing the following fields: ' + missingFields});
+		}
+		
 		const user = await db.Users.findById(req.params.userId).populate('transactions').exec();
+		
+		if(req.body.type === 'Transfer'){
+			const userCP = await db.Users.findOne({username: req.body.counterparty}).populate('transactions').exec();
+			if(!userCP){
+				return res.status(400).json({error: "That user doesn't exist"});
+			}
+			
+			let lastTransactionCP;
+			if(userCP.transactions.length){
+				lastTransactionCP = userCP.transactions.reduce((acc, next) => next.transactionNumber > acc.transactionNumber ? next : acc);
+			} else {
+				lastTransactionCP = {transactionNumber: -1, accountBalance: 0};
+			}
+			const amountCP = -1*(+req.body.amount);
+			await db.Transactions.create({
+				description: 'Transfer from ' + user.username,
+				amount: amountCP,
+				user: userCP.id, 
+				counterparty: user.username,
+				transactionNumber: lastTransactionCP.transactionNumber + 1,
+				accountBalance: lastTransactionCP.accountBalance + amountCP
+			});
+		}
+		
 		
 		let lastTransaction;
 		if(user.transactions.length){
 			lastTransaction = user.transactions.reduce((acc, next) => next.transactionNumber > acc.transactionNumber ? next : acc);
 		} else {
 			lastTransaction = {transactionNumber: -1, accountBalance: 0};
-		}
-			
+		}	
 		const transaction = await db.Transactions.create({
-			...req.body, 
 			user: req.params.userId, 
+			amount: +req.body.amount,
+			description: req.body.description,
+			counterparty: req.body.counterparty,
 			transactionNumber: lastTransaction.transactionNumber + 1,
 			accountBalance: lastTransaction.accountBalance + (+req.body.amount)
 		});
