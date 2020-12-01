@@ -21,6 +21,15 @@ router.post('/', isUserLoggedIn, doesUserOwnResource, async function(req, res){
 		if(missingFields.length){
 			return res.status(400).json({error: 'Missing the following fields: ' + missingFields});
 		}
+		if(isNaN(req.body.amount) || +req.body.amount === 0){
+			return res.status(400).json({error: 'Amount must be a non-zero number'});
+		}
+		if(!['Transfer', 'Deposit', 'Withdrawal'].includes(req.body.type)){
+			return res.status(400).json({error: 'Type must be either Transfer, Deposit, or Withdrawal'});
+		}
+		if(!String(req.body.description).length){
+			return res.status(400).json({error: 'The description field cannot be empty'});
+		}
 		
 		const user = await db.Users.findById(req.params.userId).populate('transactions').exec();
 		
@@ -101,6 +110,13 @@ router.delete('/:transactionId', isUserLoggedIn, doesUserOwnResource, async func
 
 router.post('/generate/:num', isUserLoggedIn, doesUserOwnResource, async function(req, res){
 	try {
+		if(isNaN(req.params.num) || Math.round(+req.params.num) !== +req.params.num){
+			return res.status(400).json({error: 'Number of transactions must be an integer'});
+		}
+		if(+req.params.num < 1){
+			return res.status(400).json({error: 'Number of transactions must be greater than or equal to 1'});
+		}
+		
 		const user = await db.Users.findById(req.params.userId).populate('transactions').exec();
 		let lastTransaction; 
 		if(user.transactions.length){
