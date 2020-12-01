@@ -1,18 +1,10 @@
-const express = require('express'),
-	  router  = express.Router({mergeParams: true}),
-	  db      = require('../models'),
-	  {isUserLoggedIn, doesUserOwnResource} = require('../middleware/auth'),
-	  faker   = require('faker');
-
-function checkMissingFields(body, requiredFields){
-	const missingFields = [];
-	for(let i of requiredFields){
-		if(!(i in body)){
-			missingFields.push(i);
-		}
-	}
-	return missingFields;
-}
+const express               = require('express'),
+	  router                = express.Router({mergeParams: true}),
+	  db                    = require('../models'),
+	  {isUserLoggedIn,
+	   doesUserOwnResource} = require('../middleware/auth'),
+	  faker                 = require('faker'),
+	  {checkMissingFields}  = require('../utils');
 
 router.get('/', isUserLoggedIn, doesUserOwnResource, async function(req, res){
 	try {
@@ -79,6 +71,12 @@ router.post('/', isUserLoggedIn, doesUserOwnResource, async function(req, res){
 router.get('/:transactionId', isUserLoggedIn, doesUserOwnResource, async function(req, res){
 	try {
 		const transaction = await db.Transactions.findById(req.params.transactionId);
+		if(!transaction){
+			return res.status(400).json({error: "That transaction doesn't exist"});
+		}
+		if(transaction.user.toString() !== req.params.userId){
+			return res.status(401).json({error: "You're not authorized to access that transaction"});
+		}
 		return res.json(transaction);
 	} catch(err) {
 		return res.status(500).json({error: err.message});
@@ -88,6 +86,12 @@ router.get('/:transactionId', isUserLoggedIn, doesUserOwnResource, async functio
 router.delete('/:transactionId', isUserLoggedIn, doesUserOwnResource, async function(req, res){
 	try {
 		const transaction = await db.Transactions.findById(req.params.transactionId);
+		if(!transaction){
+			return res.status(400).json({error: "That transaction doesn't exist"});
+		}
+		if(transaction.user.toString() !== req.params.userId){
+			return res.status(401).json({error: "You're not authorized to access that transaction"});
+		}
 		transaction.remove();
 		return res.json(transaction);
 	} catch(err) {

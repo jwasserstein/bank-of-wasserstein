@@ -1,20 +1,16 @@
-const express = require('express'),
-	  router  = express.Router({mergeParams: true}),
-	  db      = require('../models'),
-	  bcrypt  = require('bcrypt'),
-	  isUserLoggedin = require('../middleware/auth'),
-	  jwt     = require('jsonwebtoken');
+const express              = require('express'),
+	  router               = express.Router({mergeParams: true}),
+	  db                   = require('../models'),
+	  bcrypt               = require('bcrypt'),
+	  isUserLoggedin       = require('../middleware/auth'),
+	  jwt                  = require('jsonwebtoken'),
+	  {checkMissingFields} = require('../utils');
 
 router.post('/signup', async function(req, res) {
 	try {
-		if(!req.body.username) {
-			return res.status(401).json({error: 'Username is required'});
-		}
-		if(!req.body.password) {
-			return res.status(401).json({error: 'Password is required'});
-		}
-		if(!req.body.email) {
-			return res.status(401).json({error: 'Email is required'});
+		const missingFields = checkMissingFields(req.body, ['username', 'password', 'email']);
+		if(missingFields.length){
+			return res.status(400).json({error: 'Missing the following fields: ' + missingFields});
 		}
 		
 		const user = await db.Users.create(req.body);
@@ -36,11 +32,9 @@ router.post('/signup', async function(req, res) {
 
 router.post('/signin', async function (req, res) {
 	try {
-		if(!req.body.username) {
-			return res.status(401).json({error: 'Username is required'});
-		}
-		if(!req.body.password) {
-			return res.status(401).json({error: 'Password is required'});
+		const missingFields = checkMissingFields(req.body, ['username', 'password']);
+		if(missingFields.length){
+			return res.status(400).json({error: 'Missing the following fields: ' + missingFields});
 		}
 		
 		const user = await db.Users.findOne({username: req.body.username});
