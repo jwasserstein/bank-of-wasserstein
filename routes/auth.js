@@ -18,12 +18,14 @@ router.post('/signup', async function(req, res) {
 		const token = jwt.sign({
 			id: user._id,
 			username: user.username,
-			email: user.email
+			email: user.email,
+			joinDate: user.joinDate
 		}, process.env.SECRET_KEY);
 		return res.status(201).json({
 			id: user._id,
 			username: user.username,
 			email: user.email,
+			joinDate: user.joinDate,
 			token
 		});
 	} catch (err) {
@@ -47,12 +49,14 @@ router.post('/signin', async function (req, res) {
 			const token = jwt.sign({
 				id: user._id,
 				username: user.username,
-				email: user.email
+				email: user.email,
+				joinDate: user.joinDate
 			}, process.env.SECRET_KEY);
 			return res.json({
 				id: user._id,
 				username: user.username,
 				email: user.email,
+				joinDate: user.joinDate,
 				token
 			});
 		} else {
