@@ -67,13 +67,25 @@ router.post('/signin', async function (req, res) {
 	}
 });
 
-router.get('/profile/:userId', isUserLoggedIn, doesUserOwnResource, async function(req, res){
+router.post('/changePassword/:userId', isUserLoggedIn, doesUserOwnResource, async function(req, res){
+	const missingFields = checkMissingFields(req.body, ['currentPassword', 'newPassword', 'repeatNewPassword']);
+	if(missingFields.length){
+		return res.status(400).json({error: 'Missing the following fields: ' + missingFields});
+	}
+	if(req.body.newPassword !== req.body.repeatNewPassword){
+		return res.status(400).json({error: 'New passwords must match'});
+	}
+
 	const user = await db.Users.findById(req.params.userId);
-	const joinDate = user.joinDate || 'Unknown';
-	return res.json({
-		username: user.username, 
-		email: user.email, 
-		joinDate: joinDate});
+	const isMatch = await bcrypt.compare(req.body.currentPassword, user.password);
+	if(!isMatch){
+		return res.status(401).json({error: 'Incorrect password'});
+	}
+	user.password = req.body.newPassword; // pre-save hook will salt & hash
+	user.save();
+	
+	const message = 'Successfully changed your password';
+	return res.json({message});
 });
 
 module.exports = router;
