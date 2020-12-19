@@ -19,7 +19,11 @@ const userSchema = new mongoose.Schema({
 	transactions: [{
 		type: mongoose.Schema.Types.ObjectId,
 		ref: 'transaction'
-	}]
+	}],
+	joinDate: {
+		type: Date,
+		default: Date.now
+	}
 });
 
 userSchema.pre('save', async function(next){

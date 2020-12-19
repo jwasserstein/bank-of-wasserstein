@@ -1,10 +1,11 @@
-const express              = require('express'),
-	  router               = express.Router({mergeParams: true}),
-	  db                   = require('../models'),
-	  bcrypt               = require('bcrypt'),
-	  isUserLoggedin       = require('../middleware/auth'),
-	  jwt                  = require('jsonwebtoken'),
-	  {checkMissingFields} = require('../utils');
+const express                = require('express'),
+	  router                 = express.Router({mergeParams: true}),
+	  db                     = require('../models'),
+	  bcrypt                 = require('bcrypt'),
+	  {isUserLoggedIn, 
+		doesUserOwnResource} = require('../middleware/auth'),
+	  jwt                    = require('jsonwebtoken'),
+	  {checkMissingFields}   = require('../utils');
 
 router.post('/signup', async function(req, res) {
 	try {
@@ -60,6 +61,15 @@ router.post('/signin', async function (req, res) {
 	} catch (err) {
 		return res.status(500).json({error: err.message});
 	}
+});
+
+router.get('/profile/:userId', isUserLoggedIn, doesUserOwnResource, async function(req, res){
+	const user = await db.Users.findById(req.params.userId);
+	const joinDate = user.joinDate || 'Unknown';
+	return res.json({
+		username: user.username, 
+		email: user.email, 
+		joinDate: joinDate});
 });
 
 module.exports = router;
