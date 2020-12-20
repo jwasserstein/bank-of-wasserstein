@@ -10,7 +10,7 @@ const express = require('express'),
 app.use(cors());
 app.use(bodyParser.json());
 app.use('/api/auth', authRoutes);
-app.use('/api/transactions/:userId', transactionRoutes);
+app.use('/api/:userId/accounts/:accountId/transactions/', transactionRoutes);
 app.use('/api/:userId/accounts', accountRoutes);
 
 app.use(function(req, res, next) {

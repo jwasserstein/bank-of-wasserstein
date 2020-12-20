@@ -1,1 +1,4 @@
 - Add pre-remove hook to accounts to remove the transactions associated with that account
+- Determine what happens when you create an account: do you get a default checking account or just a blank user account?
+- Remove the pre-save hook for transactions, move the accounts.push() operation to the create transaction route.  If you ever add a route to modify and save a transaction, the pre-save hook will push another copy of its ID to the accounts.transactions array
+- Change all routes to get userId from token instead of the route

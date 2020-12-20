@@ -15,7 +15,7 @@ router.get('/', isUserLoggedIn, doesUserOwnResource, async function(req, res){
 
 router.post('/', isUserLoggedIn, doesUserOwnResource, async function(req, res){
     try {
-        const missingFields = checkMissingFields(req.body, ['name', 'type']);
+        const missingFields = checkMissingFields(req.body, ['type']);
         if(missingFields.length){
             return res.status(400).json({error: `Missing the following fields: ${missingFields}`});
         }
@@ -23,13 +23,22 @@ router.post('/', isUserLoggedIn, doesUserOwnResource, async function(req, res){
             return res.status(400).json({error: 'Type must be one of the following: Checking, Savings, Investing'});
         }
 
+        const user = await db.Users.findById(req.params.userId).populate('accounts').exec();
+        for(let i = 0; i < user.accounts.length; i++){
+            if(user.accounts[i].type === req.body.type){
+                return res.status(400).json({error: `You already have a ${req.body.type} account`});
+            }
+        }
+
         const account = await db.Accounts.create({
-            name: req.body.name,
             type: req.body.type,
             user: req.params.userId,
             transactions: []
         });
-        return res.json(account);
+
+        user.accounts.push(account);
+        await user.save();
+        return res.json(user.accounts);
     } catch(err) {
         return res.status(500).json({error: err.message});
     }
