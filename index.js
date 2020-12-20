@@ -4,12 +4,14 @@ const express = require('express'),
 	  bodyParser = require('body-parser'),
 	  cors       = require('cors'),
 	  authRoutes = require('./routes/auth'),
-	  transactionRoutes = require('./routes/transactions');
+	  transactionRoutes = require('./routes/transactions'),
+	  accountRoutes = require('./routes/accounts');
 
 app.use(cors());
 app.use(bodyParser.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/transactions/:userId', transactionRoutes);
+app.use('/api/:userId/accounts', accountRoutes);
 
 app.use(function(req, res, next) {
 	return res.status(404).json({error: 'Route not found'});

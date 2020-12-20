@@ -1,0 +1,1 @@
+- Add removal route for accounts (like closing an account)

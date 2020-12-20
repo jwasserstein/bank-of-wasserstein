@@ -16,9 +16,9 @@ const userSchema = new mongoose.Schema({
 		required: true,
 		unique: true
 	},
-	transactions: [{
+	accounts: [{
 		type: mongoose.Schema.Types.ObjectId,
-		ref: 'transaction'
+		ref: 'account'
 	}],
 	joinDate: {
 		type: Date,
