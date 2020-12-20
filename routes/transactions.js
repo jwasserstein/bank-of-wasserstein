@@ -102,37 +102,6 @@ router.post('/', isUserLoggedIn, async function(req, res){
 	}
 });
 
-router.get('/:transactionId', isUserLoggedIn, async function(req, res){
-	try {
-		const transaction = await db.Transactions.findById(req.params.transactionId);
-		if(!transaction){
-			return res.status(400).json({error: "That transaction doesn't exist"});
-		}
-		if(transaction.user.toString() !== res.locals.user.id){
-			return res.status(401).json({error: "You're not authorized to access that transaction"});
-		}
-		return res.json(transaction);
-	} catch(err) {
-		return res.status(500).json({error: err.message});
-	}
-});
-
-router.delete('/:transactionId', isUserLoggedIn, async function(req, res){
-	try {
-		const transaction = await db.Transactions.findById(req.params.transactionId);
-		if(!transaction){
-			return res.status(400).json({error: "That transaction doesn't exist"});
-		}
-		if(transaction.user.toString() !== res.locals.user.id){
-			return res.status(401).json({error: "You're not authorized to access that transaction"});
-		}
-		transaction.remove();
-		return res.json(transaction);
-	} catch(err) {
-		return res.status(500).json({error: err.message});
-	}
-});
-
 router.post('/generate/:num', isUserLoggedIn, async function(req, res){
 	try {
 		if(isNaN(req.params.num) || Math.round(+req.params.num) !== +req.params.num){
