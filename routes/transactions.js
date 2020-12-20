@@ -111,10 +111,14 @@ router.post('/generate/:num', isUserLoggedIn, async function(req, res){
 			return res.status(400).json({error: 'Number of transactions must be greater than or equal to 1'});
 		}
 		
-		const user = await db.Users.findById(res.locals.user.id).populate('transactions').exec();
+		const account = await db.Accounts.findById(req.params.accountId).populate('transactions').populate('user').exec();
+		if(account.user.id !== res.locals.user.id){
+			return res.status(401).json({error: "You're not authorized to access that resource"});
+		}
+
 		let lastTransaction; 
-		if(user.transactions.length){
-			lastTransaction = user.transactions.reduce((acc, next) => next.transactionNumber > acc.transactionNumber ? next : acc);
+		if(account.transactions.length){
+			lastTransaction = account.transactions.reduce((acc, next) => next.transactionNumber > acc.transactionNumber ? next : acc);
 		} else {
 			lastTransaction = {transactionNumber: -1, accountBalance: 0};
 		}
@@ -133,11 +137,12 @@ router.post('/generate/:num', isUserLoggedIn, async function(req, res){
 				amount: amount,
 				counterparty: counterparty,
 				transactionNumber: lastTransaction.transactionNumber + i + 1,
-				accountBalance: +(lastTransaction.accountBalance + cumulativeNewAmount).toFixed(2)
+				accountBalance: +(lastTransaction.accountBalance + cumulativeNewAmount).toFixed(2),
+				account: account._id
 			});
 		}
 		transactions = await db.Transactions.create(transactions);
-		return res.status(201).json([...user.transactions, ...transactions]);
+		return res.status(201).json([...account.transactions, ...transactions]);
 	} catch(err) {
 		return res.status(500).json({error: err.message});
 	}
