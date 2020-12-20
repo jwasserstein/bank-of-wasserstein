@@ -1,1 +1,1 @@
-- Add removal route for accounts (like closing an account)
+- Add pre-remove hook to accounts to remove the transactions associated with that account

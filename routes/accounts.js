@@ -5,26 +5,50 @@ const {isUserLoggedIn, doesUserOwnResource} = require('../middleware/auth');
 const {checkMissingFields} = require('../utils/');
 
 router.get('/', isUserLoggedIn, doesUserOwnResource, async function(req, res){
-    const user = await db.Users.findById(req.params.userId);
-    return res.json(user.accounts);
+    try {
+        const user = await db.Users.findById(req.params.userId).populate('accounts').exec();
+        return res.json(user.accounts);
+    } catch(err) {
+        return res.status(500).json({error: err.message});
+    }
 });
 
 router.post('/', isUserLoggedIn, doesUserOwnResource, async function(req, res){
-    const missingFields = checkMissingFields(req.body, ['name', 'type']);
-    if(missingFields.length){
-        return res.status(400).json({error: `Missing the following fields: ${missingFields}`});
-    }
-    if(!['Checking', 'Savings', 'Investing'].includes(req.body.type)){
-        return res.status(400).json({error: 'Type must be one of the follwing: Checking, Savings, Investing'});
-    }
+    try {
+        const missingFields = checkMissingFields(req.body, ['name', 'type']);
+        if(missingFields.length){
+            return res.status(400).json({error: `Missing the following fields: ${missingFields}`});
+        }
+        if(!['Checking', 'Savings', 'Investing'].includes(req.body.type)){
+            return res.status(400).json({error: 'Type must be one of the following: Checking, Savings, Investing'});
+        }
 
-    const account = await db.Accounts.create({
-        name: req.body.name,
-        type: req.body.type,
-        user: req.params.userId,
-        transactions: []
-    });
-    return res.json(account);
+        const account = await db.Accounts.create({
+            name: req.body.name,
+            type: req.body.type,
+            user: req.params.userId,
+            transactions: []
+        });
+        return res.json(account);
+    } catch(err) {
+        return res.status(500).json({error: err.message});
+    }
+});
+
+router.delete('/:accountId', isUserLoggedIn, doesUserOwnResource, async function(req, res){
+    try {
+        const account = await db.Accounts.findById(req.params.accountId);
+        if(!account){
+            return res.status(400).json({error: "That account doesn't exist"});
+        }
+        if(account.user.toString() !== req.params.userId){
+			return res.status(401).json({error: "You're not authorized to access that transaction"});
+        }
+        account.remove();
+        return res.json(account);
+    } catch(err) {
+        return res.status(500).json({error: err.message});
+    }
 });
 
 module.exports = router;

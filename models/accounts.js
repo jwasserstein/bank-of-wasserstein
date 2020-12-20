@@ -36,4 +36,15 @@ accountSchema.pre('save', async function(next){
     }
 });
 
+accountSchema.pre('remove', async function(next){
+    try {
+        const user = await Users.findById(this.user);
+        user.accounts = user.accounts.filter(a => a != this.id);
+        await user.save();
+        return next();
+    } catch(err) {
+        return next(err);
+    }
+});
+
 module.exports = mongoose.model('account', accountSchema);
