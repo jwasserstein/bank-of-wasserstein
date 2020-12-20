@@ -10,8 +10,8 @@ const express = require('express'),
 app.use(cors());
 app.use(bodyParser.json());
 app.use('/api/auth', authRoutes);
-app.use('/api/:userId/accounts/:accountId/transactions/', transactionRoutes);
-app.use('/api/:userId/accounts', accountRoutes);
+app.use('/api/accounts/:accountId/transactions/', transactionRoutes);
+app.use('/api/accounts', accountRoutes);
 
 app.use(function(req, res, next) {
 	return res.status(404).json({error: 'Route not found'});

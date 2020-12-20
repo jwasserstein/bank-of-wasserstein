@@ -2,8 +2,7 @@ const express                = require('express'),
 	  router                 = express.Router({mergeParams: true}),
 	  db                     = require('../models'),
 	  bcrypt                 = require('bcrypt'),
-	  {isUserLoggedIn, 
-		doesUserOwnResource} = require('../middleware/auth'),
+	  {isUserLoggedIn}       = require('../middleware/auth'),
 	  jwt                    = require('jsonwebtoken'),
 	  {checkMissingFields}   = require('../utils');
 
@@ -67,7 +66,7 @@ router.post('/signin', async function (req, res) {
 	}
 });
 
-router.post('/changePassword/:userId', isUserLoggedIn, doesUserOwnResource, async function(req, res){
+router.post('/changePassword/:userId', isUserLoggedIn, async function(req, res){
 	const missingFields = checkMissingFields(req.body, ['currentPassword', 'newPassword', 'repeatNewPassword']);
 	if(missingFields.length){
 		return res.status(400).json({error: 'Missing the following fields: ' + missingFields});
@@ -76,7 +75,7 @@ router.post('/changePassword/:userId', isUserLoggedIn, doesUserOwnResource, asyn
 		return res.status(400).json({error: 'New passwords must match'});
 	}
 
-	const user = await db.Users.findById(req.params.userId);
+	const user = await db.Users.findById(res.locals.user.id);
 	const isMatch = await bcrypt.compare(req.body.currentPassword, user.password);
 	if(!isMatch){
 		return res.status(401).json({error: 'Incorrect password'});

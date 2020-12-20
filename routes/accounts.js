@@ -1,19 +1,19 @@
 const express = require('express');
 const router = express.Router({mergeParams: true});
 const db = require('../models');
-const {isUserLoggedIn, doesUserOwnResource} = require('../middleware/auth');
+const {isUserLoggedIn} = require('../middleware/auth');
 const {checkMissingFields} = require('../utils/');
 
-router.get('/', isUserLoggedIn, doesUserOwnResource, async function(req, res){
+router.get('/', isUserLoggedIn, async function(req, res){
     try {
-        const user = await db.Users.findById(req.params.userId).populate('accounts').exec();
+        const user = await db.Users.findById(res.locals.user.id).populate('accounts').exec();
         return res.json(user.accounts);
     } catch(err) {
         return res.status(500).json({error: err.message});
     }
 });
 
-router.post('/', isUserLoggedIn, doesUserOwnResource, async function(req, res){
+router.post('/', isUserLoggedIn, async function(req, res){
     try {
         const missingFields = checkMissingFields(req.body, ['type']);
         if(missingFields.length){
@@ -23,7 +23,7 @@ router.post('/', isUserLoggedIn, doesUserOwnResource, async function(req, res){
             return res.status(400).json({error: 'Type must be one of the following: Checking, Savings, Investing'});
         }
 
-        const user = await db.Users.findById(req.params.userId).populate('accounts').exec();
+        const user = await db.Users.findById(res.locals.user.id).populate('accounts').exec();
         for(let i = 0; i < user.accounts.length; i++){
             if(user.accounts[i].type === req.body.type){
                 return res.status(400).json({error: `You already have a ${req.body.type} account`});
@@ -32,7 +32,7 @@ router.post('/', isUserLoggedIn, doesUserOwnResource, async function(req, res){
 
         const account = await db.Accounts.create({
             type: req.body.type,
-            user: req.params.userId,
+            user: res.locals.user.id,
             transactions: []
         });
 
@@ -44,13 +44,13 @@ router.post('/', isUserLoggedIn, doesUserOwnResource, async function(req, res){
     }
 });
 
-router.delete('/:accountId', isUserLoggedIn, doesUserOwnResource, async function(req, res){
+router.delete('/:accountId', isUserLoggedIn, async function(req, res){
     try {
         const account = await db.Accounts.findById(req.params.accountId);
         if(!account){
             return res.status(400).json({error: "That account doesn't exist"});
         }
-        if(account.user.toString() !== req.params.userId){
+        if(account.user.toString() !== res.locals.user.id){
 			return res.status(401).json({error: "You're not authorized to access that transaction"});
         }
         account.remove();

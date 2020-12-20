@@ -1,21 +1,23 @@
 const express               = require('express'),
 	  router                = express.Router({mergeParams: true}),
 	  db                    = require('../models'),
-	  {isUserLoggedIn,
-	   doesUserOwnResource} = require('../middleware/auth'),
+	  {isUserLoggedIn}      = require('../middleware/auth'),
 	  faker                 = require('faker'),
 	  {checkMissingFields}  = require('../utils');
 
-router.get('/', isUserLoggedIn, doesUserOwnResource, async function(req, res){
+router.get('/', isUserLoggedIn, async function(req, res){
 	try {
-		const user = await db.Accounts.findById(req.params.accountId).populate('transactions').exec();
-		return res.json(user.transactions);
+		const account = await db.Accounts.findById(req.params.accountId).populate('transactions').populate('user').exec();
+		if(account.user.id !== res.locals.user.id){
+			return res.status(401).json({error: "You're not authorized to access that resource"});
+		}
+		return res.json(account.transactions);
 	} catch(err) {
 		return res.status(500).json({error: err.message});
 	}
 });
 
-router.post('/', isUserLoggedIn, doesUserOwnResource, async function(req, res){
+router.post('/', isUserLoggedIn, async function(req, res){
 	try {
 		let missingFields = checkMissingFields(req.body, ['amount', 'type', 'description']); // check general field types
 		if(missingFields.length){
@@ -41,6 +43,9 @@ router.post('/', isUserLoggedIn, doesUserOwnResource, async function(req, res){
 		}
 		
 		const account = await db.Accounts.findById(req.params.accountId).populate('transactions').populate('user').exec();
+		if(account.user.id !== res.locals.user.id){
+			return res.status(401).json({error: "You're not authorized to access that resource"});
+		}
 		
 		if(req.body.type === 'Transfer'){
 			const userCP = await db.Users.findOne({username: req.body.counterparty}).populate('accounts').exec();
@@ -80,7 +85,7 @@ router.post('/', isUserLoggedIn, doesUserOwnResource, async function(req, res){
 			lastTransaction = {transactionNumber: -1, accountBalance: 0};
 		}	
 		const transaction = await db.Transactions.create({
-			user: req.params.userId, 
+			user: res.locals.user.id, 
 			amount: +req.body.amount,
 			description: req.body.description,
 			counterparty: req.body.counterparty,
@@ -94,13 +99,13 @@ router.post('/', isUserLoggedIn, doesUserOwnResource, async function(req, res){
 	}
 });
 
-router.get('/:transactionId', isUserLoggedIn, doesUserOwnResource, async function(req, res){
+router.get('/:transactionId', isUserLoggedIn, async function(req, res){
 	try {
 		const transaction = await db.Transactions.findById(req.params.transactionId);
 		if(!transaction){
 			return res.status(400).json({error: "That transaction doesn't exist"});
 		}
-		if(transaction.user.toString() !== req.params.userId){
+		if(transaction.user.toString() !== res.locals.user.id){
 			return res.status(401).json({error: "You're not authorized to access that transaction"});
 		}
 		return res.json(transaction);
@@ -109,13 +114,13 @@ router.get('/:transactionId', isUserLoggedIn, doesUserOwnResource, async functio
 	}
 });
 
-router.delete('/:transactionId', isUserLoggedIn, doesUserOwnResource, async function(req, res){
+router.delete('/:transactionId', isUserLoggedIn, async function(req, res){
 	try {
 		const transaction = await db.Transactions.findById(req.params.transactionId);
 		if(!transaction){
 			return res.status(400).json({error: "That transaction doesn't exist"});
 		}
-		if(transaction.user.toString() !== req.params.userId){
+		if(transaction.user.toString() !== res.locals.user.id){
 			return res.status(401).json({error: "You're not authorized to access that transaction"});
 		}
 		transaction.remove();
@@ -125,7 +130,7 @@ router.delete('/:transactionId', isUserLoggedIn, doesUserOwnResource, async func
 	}
 });
 
-router.post('/generate/:num', isUserLoggedIn, doesUserOwnResource, async function(req, res){
+router.post('/generate/:num', isUserLoggedIn, async function(req, res){
 	try {
 		if(isNaN(req.params.num) || Math.round(+req.params.num) !== +req.params.num){
 			return res.status(400).json({error: 'Number of transactions must be an integer'});
@@ -134,7 +139,7 @@ router.post('/generate/:num', isUserLoggedIn, doesUserOwnResource, async functio
 			return res.status(400).json({error: 'Number of transactions must be greater than or equal to 1'});
 		}
 		
-		const user = await db.Users.findById(req.params.userId).populate('transactions').exec();
+		const user = await db.Users.findById(res.locals.user.id).populate('transactions').exec();
 		let lastTransaction; 
 		if(user.transactions.length){
 			lastTransaction = user.transactions.reduce((acc, next) => next.transactionNumber > acc.transactionNumber ? next : acc);
@@ -151,7 +156,7 @@ router.post('/generate/:num', isUserLoggedIn, doesUserOwnResource, async functio
 
 			cumulativeNewAmount += amount;
 			transactions.push({
-				user: req.params.userId,
+				user: res.locals.user.id,
 				description: description,
 				amount: amount,
 				counterparty: counterparty,
