@@ -56,6 +56,9 @@ router.post('/', isUserLoggedIn, async function(req, res){
 			if(!cPAccount){
 				return res.status(400).json({error: `That user doesn't have a ${req.body.accountType} account`});
 			}
+			if(cPAccount.id === account.id){
+				return res.status(400).json({error: "You can't transfer from an account to itself"});
+			}
 
 			cPAccount = await db.Accounts.findById(cPAccount.id).populate('transactions').exec();
 			
