@@ -53,6 +53,11 @@ router.delete('/:accountId', isUserLoggedIn, async function(req, res){
         if(account.user.toString() !== res.locals.user.id){
 			return res.status(401).json({error: "You're not authorized to access that transaction"});
         }
+
+        const user = await db.Users.findById(res.locals.user.id);
+        user.accounts = user.accounts.filter(a => a != req.params.accountId);
+        await user.save();
+        await db.Transactions.deleteMany({_id: {$in: account.transactions}});
         account.remove();
         return res.json(account);
     } catch(err) {
