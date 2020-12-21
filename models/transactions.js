@@ -41,6 +41,7 @@ transactionSchema.pre('save', async function(next){
 	try {
 		const account = await Accounts.findById(this.account);
 		account.transactions.push(this._id);
+		account.accountBalance = this.accountBalance;
 		await account.save();
 		return next();
 	} catch(err) {

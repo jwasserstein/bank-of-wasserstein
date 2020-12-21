@@ -33,7 +33,8 @@ router.post('/', isUserLoggedIn, async function(req, res){
         const account = await db.Accounts.create({
             type: req.body.type,
             user: res.locals.user.id,
-            transactions: []
+            transactions: [],
+            accountBalance: 0
         });
 
         user.accounts.push(account);

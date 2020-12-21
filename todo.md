@@ -1,1 +1,2 @@
 - Remove the pre-save hook for transactions, move the accounts.push() operation to the create transaction route.  If you ever add a route to modify and save a transaction, the pre-save hook will push another copy of its ID to the accounts.transactions array
+- Remove pre-remove hook from transaction model.  Can't delete transactions in any way other than deleting the account they belong to.  Avoids the circular reference conflict.

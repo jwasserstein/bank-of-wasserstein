@@ -18,7 +18,11 @@ const accountSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'transaction',
         required: true
-    }]
+    }],
+    accountBalance: {
+        type: Number,
+        required: true
+    }
 });
 
 module.exports = mongoose.model('account', accountSchema);
