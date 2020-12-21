@@ -1,10 +1,16 @@
 const mongoose = require('mongoose'),
-	  Users    = require('./users');
+	  Accounts = require('./accounts');
 
 const transactionSchema = new mongoose.Schema({
 	user: {
 		type: mongoose.Schema.Types.ObjectId,
-		ref: 'user'
+		ref: 'user',
+		required: true
+	},
+	account: {
+		type: mongoose.Schema.Types.ObjectId,
+		ref: 'account',
+		required: true
 	},
 	description: {
 		type: String,
@@ -19,8 +25,7 @@ const transactionSchema = new mongoose.Schema({
 		default: Date.now
 	},
 	counterparty: {
-		type: String,
-		required: true
+		type: String
 	},
 	transactionNumber: {
 		type: Number,
@@ -34,9 +39,9 @@ const transactionSchema = new mongoose.Schema({
 
 transactionSchema.pre('save', async function(next){
 	try {
-		const user = await Users.findById(this.user);
-		user.transactions.push(this._id);
-		await user.save();
+		const account = await Accounts.findById(this.account);
+		account.transactions.push(this._id);
+		await account.save();
 		return next();
 	} catch(err) {
 		return next(err);
@@ -45,9 +50,9 @@ transactionSchema.pre('save', async function(next){
 
 transactionSchema.pre('remove', async function(next){
 	try {
-		const user = await Users.findById(this.user);
-		user.transactions = user.transactions.filter(t => t != this.id);
-		await user.save();
+		const account = await Accounts.findById(this.account);
+		account.transactions = account.transactions.filter(t => t != this.id);
+		await account.save();
 		return next();
 	} catch(err) {
 		return next(err);

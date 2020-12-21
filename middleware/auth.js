@@ -11,17 +11,9 @@ function isUserLoggedIn(req, res, next){
 		if(Date.now()/1000 - decoded.iat > 3600) {
 			return res.status(401).json({error: 'Your token has expired'});
 		}
+		res.locals.user = decoded;
 		return next();
 	});
 }
 
-function doesUserOwnResource(req, res, next){
-	jwt.verify(req.headers.authorization.split(' ')[1], process.env.SECRET_KEY, (err, decoded) => {
-		if(decoded.id != req.params.userId){
-			return res.status(401).json({error: "You're not authorized to access that resource"});
-		}
-		return next();
-	});
-}
-
-module.exports = {isUserLoggedIn, doesUserOwnResource};
+module.exports = {isUserLoggedIn};
