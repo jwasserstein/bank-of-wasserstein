@@ -66,7 +66,7 @@ router.post('/signin', async function (req, res) {
 	}
 });
 
-router.post('/changePassword/:userId', isUserLoggedIn, async function(req, res){
+router.post('/changePassword', isUserLoggedIn, async function(req, res){
 	const missingFields = checkMissingFields(req.body, ['currentPassword', 'newPassword', 'repeatNewPassword']);
 	if(missingFields.length){
 		return res.status(400).json({error: 'Missing the following fields: ' + missingFields});
