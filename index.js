@@ -5,8 +5,10 @@ const express = require('express'),
 	  cors       = require('cors'),
 	  authRoutes = require('./routes/auth'),
 	  transactionRoutes = require('./routes/transactions'),
-	  accountRoutes = require('./routes/accounts');
+	  accountRoutes = require('./routes/accounts'),
+	  {redirectToHTTPS} = require('./middleware');
 
+app.use(redirectToHTTPS);
 app.use(cors());
 app.use(bodyParser.json());
 app.use('/api/auth', authRoutes);
