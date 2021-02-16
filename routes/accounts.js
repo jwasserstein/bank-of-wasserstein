@@ -23,15 +23,17 @@ router.post('/', isUserLoggedIn, async function(req, res){
             return res.status(400).json({error: 'Type must be one of the following: Checking, Savings, Investing'});
         }
 
+        const type = req.sanitize(req.body.type);
+
         const user = await db.Users.findById(res.locals.user.id).populate('accounts').exec();
         for(let i = 0; i < user.accounts.length; i++){
-            if(user.accounts[i].type === req.body.type){
-                return res.status(400).json({error: `You already have a ${req.body.type} account`});
+            if(user.accounts[i].type === type){
+                return res.status(400).json({error: `You already have a ${type} account`});
             }
         }
 
         const account = await db.Accounts.create({
-            type: req.body.type,
+            type: type,
             user: res.locals.user.id,
             transactions: [],
             accountBalance: 0
@@ -47,7 +49,9 @@ router.post('/', isUserLoggedIn, async function(req, res){
 
 router.delete('/:accountId', isUserLoggedIn, async function(req, res){
     try {
-        const account = await db.Accounts.findById(req.params.accountId);
+        const accountId = req.sanitize(req.params.accountId);
+
+        const account = await db.Accounts.findById(accountId);
         if(!account){
             return res.status(400).json({error: "That account doesn't exist"});
         }
@@ -56,7 +60,7 @@ router.delete('/:accountId', isUserLoggedIn, async function(req, res){
         }
 
         const user = await db.Users.findById(res.locals.user.id);
-        user.accounts = user.accounts.filter(a => a != req.params.accountId);
+        user.accounts = user.accounts.filter(a => a != accountId);
         await user.save();
         await db.Transactions.deleteMany({_id: {$in: account.transactions}});
         account.remove();

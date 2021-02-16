@@ -3,6 +3,8 @@ const express = require('express'),
 	  app     = express(),
 	  bodyParser = require('body-parser'),
 	  cors       = require('cors'),
+	  expressSanitizer = require('express-sanitizer'),
+	  mongoSanitize = require('express-mongo-sanitize'),
 	  authRoutes = require('./routes/auth'),
 	  transactionRoutes = require('./routes/transactions'),
 	  accountRoutes = require('./routes/accounts'),
@@ -11,6 +13,8 @@ const express = require('express'),
 app.use(redirectToHTTPS);
 app.use(cors());
 app.use(bodyParser.json());
+app.use(expressSanitizer());
+app.use(mongoSanitize());
 app.use('/api/auth', authRoutes);
 app.use('/api/accounts/:accountId/transactions/', transactionRoutes);
 app.use('/api/accounts', accountRoutes);

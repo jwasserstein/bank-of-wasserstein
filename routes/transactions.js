@@ -7,7 +7,8 @@ const express               = require('express'),
 
 router.get('/', isUserLoggedIn, async function(req, res){
 	try {
-		const account = await db.Accounts.findById(req.params.accountId).populate('transactions').populate('user').exec();
+		const accountId = req.sanitize(req.params.accountId);
+		const account = await db.Accounts.findById(accountId).populate('transactions').populate('user').exec();
 		if(account.user.id !== res.locals.user.id){
 			return res.status(401).json({error: "You're not authorized to access that resource"});
 		}
@@ -29,32 +30,40 @@ router.post('/', isUserLoggedIn, async function(req, res){
 				return res.status(400).json({error: 'Missing the following fields: ' + missingFields});
 			}
 		}
-		if(isNaN(req.body.amount) || +req.body.amount === 0){
+
+		const amount = req.sanitize(req.body.amount);
+		const type = req.sanitize(req.body.type);
+		const description = req.sanitize(req.body.description);
+		const counterparty = req.sanitize(req.body.counterparty);
+		const accountType = req.sanitize(req.body.accountType);
+		const accountId = req.sanitize(req.params.accountId);
+
+		if(isNaN(amount) || +amount === 0){
 			return res.status(400).json({error: 'Amount must be a non-zero number'});
 		}
-		if(!['Transfer', 'Deposit', 'Withdrawal'].includes(req.body.type)){
+		if(!['Transfer', 'Deposit', 'Withdrawal'].includes(type)){
 			return res.status(400).json({error: 'Type must be either Transfer, Deposit, or Withdrawal'});
 		}
-		if(!String(req.body.description).length){
+		if(!String(description).length){
 			return res.status(400).json({error: 'The description field cannot be empty'});
 		}
-		if(req.body.type === 'Transfer' && +req.body.amount >= 0){
+		if(type === 'Transfer' && +amount >= 0){
 			return res.status(400).json({error: 'Your transfer amount must be negative'});
 		}
 		
-		const account = await db.Accounts.findById(req.params.accountId).populate('transactions').populate('user').exec();
+		const account = await db.Accounts.findById(accountId).populate('transactions').populate('user').exec();
 		if(account.user.id !== res.locals.user.id){
 			return res.status(401).json({error: "You're not authorized to access that resource"});
 		}
 		
-		if(req.body.type === 'Transfer'){
-			const userCP = await db.Users.findOne({username: req.body.counterparty}).populate('accounts').exec();
+		if(type === 'Transfer'){
+			const userCP = await db.Users.findOne({username: counterparty}).populate('accounts').exec();
 			if(!userCP){
 				return res.status(400).json({error: "That user doesn't exist"});
 			}
-			let cPAccount = userCP.accounts.find(a => a.type === req.body.accountType);
+			let cPAccount = userCP.accounts.find(a => a.type === accountType);
 			if(!cPAccount){
-				return res.status(400).json({error: `That user doesn't have a ${req.body.accountType} account`});
+				return res.status(400).json({error: `That user doesn't have a ${accountType} account`});
 			}
 			if(cPAccount.id === account.id){
 				return res.status(400).json({error: "You can't transfer from an account to itself"});
@@ -68,7 +77,7 @@ router.post('/', isUserLoggedIn, async function(req, res){
 			} else {
 				lastTransactionCP = {transactionNumber: -1, accountBalance: 0};
 			}
-			const amountCP = -1*(+req.body.amount);
+			const amountCP = -1*(+amount);
 			await db.Transactions.create({
 				description: 'Transfer from ' + account.user.username,
 				amount: amountCP,
@@ -89,12 +98,12 @@ router.post('/', isUserLoggedIn, async function(req, res){
 		}	
 		const transaction = await db.Transactions.create({
 			user: res.locals.user.id, 
-			amount: +req.body.amount,
-			description: req.body.description,
-			counterparty: req.body.counterparty,
+			amount: +amount,
+			description: description,
+			counterparty: counterparty,
 			transactionNumber: lastTransaction.transactionNumber + 1,
-			accountBalance: lastTransaction.accountBalance + (+req.body.amount),
-			account: req.params.accountId
+			accountBalance: lastTransaction.accountBalance + (+amount),
+			account: accountId
 		});
 		return res.status(201).json([...account.transactions, transaction]);
 	} catch(err) {
@@ -104,14 +113,17 @@ router.post('/', isUserLoggedIn, async function(req, res){
 
 router.post('/generate/:num', isUserLoggedIn, async function(req, res){
 	try {
-		if(isNaN(req.params.num) || Math.round(+req.params.num) !== +req.params.num){
+		const num = req.sanitize(req.params.num);
+		const accountId = req.sanitize(req.params.accountId);
+
+		if(isNaN(num) || Math.round(+num) !== +num){
 			return res.status(400).json({error: 'Number of transactions must be an integer'});
 		}
-		if(+req.params.num < 1){
+		if(+num < 1){
 			return res.status(400).json({error: 'Number of transactions must be greater than or equal to 1'});
 		}
 		
-		const account = await db.Accounts.findById(req.params.accountId).populate('transactions').populate('user').exec();
+		const account = await db.Accounts.findById(accountId).populate('transactions').populate('user').exec();
 		if(account.user.id !== res.locals.user.id){
 			return res.status(401).json({error: "You're not authorized to access that resource"});
 		}
@@ -125,7 +137,7 @@ router.post('/generate/:num', isUserLoggedIn, async function(req, res){
 		
 		let transactions = [];
 		let cumulativeNewAmount = 0;
-		for(let i = 0; i < req.params.num; i++){
+		for(let i = 0; i < num; i++){
 			const amount = +(Math.random()*2000-700).toFixed(2);
 			const counterparty = faker.finance.transactionDescription().match(/at (.*) using/)[1];
 			const description = amount >= 0 ? 'Payment from ' + counterparty : 'Payment to ' + counterparty;
