@@ -5,6 +5,7 @@ const express = require('express'),
 	  cors       = require('cors'),
 	  expressSanitizer = require('express-sanitizer'),
 	  mongoSanitize = require('express-mongo-sanitize'),
+	  helmet = require('helmet'),
 	  authRoutes = require('./routes/auth'),
 	  transactionRoutes = require('./routes/transactions'),
 	  accountRoutes = require('./routes/accounts'),
@@ -15,6 +16,7 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(expressSanitizer());
 app.use(mongoSanitize());
+app.use(helmet());
 app.use('/api/auth', authRoutes);
 app.use('/api/accounts/:accountId/transactions/', transactionRoutes);
 app.use('/api/accounts', accountRoutes);
