@@ -56,7 +56,7 @@ router.delete('/:accountId', isUserLoggedIn, async function(req, res){
             return res.status(400).json({error: "That account doesn't exist"});
         }
         if(account.user.toString() !== res.locals.user.id){
-			return res.status(401).json({error: "You're not authorized to access that transaction"});
+			return res.status(401).json({error: "You're not authorized to access that account"});
         }
 
         const user = await db.Users.findById(res.locals.user.id);
