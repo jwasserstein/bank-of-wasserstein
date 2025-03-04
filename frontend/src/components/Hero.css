@@ -1,0 +1,60 @@
+.Hero-main-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    height: 700px;
+    margin: auto;
+}
+
+.Hero-coins-growing {
+    border-radius: 10px;
+    height: auto;
+    width: 90%;
+    max-width: 500px;
+    margin-left: 100px;
+}
+
+.Hero-main-text {
+    width: 100%;
+    max-width: 300px;
+    text-align: center;
+    margin-right: 100px;
+}
+
+.Hero-main-container h2 {
+    font-weight: 700;
+    font-size: 48px;
+    margin: 10px;
+}
+
+.Hero-main-container p {
+    font-weight: 700;
+    font-size: 18px;
+    color: #7C7C7C;
+}
+
+@media (max-width: 1100px){
+    .Hero-coins-growing {
+        margin-left: 25px;
+    }
+    
+    .Hero-main-text {
+        margin-right: 25px;
+    }
+}
+
+@media (max-width: 900px){
+    .Hero-main-container {
+        flex-direction: column-reverse;
+        justify-content: flex-end;
+    }
+
+    .Hero-coins-growing {
+        margin: 40px 0 10px 0;
+    }
+    
+    .Hero-main-text {
+        margin: 0;
+    }
+}

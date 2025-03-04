@@ -1,0 +1,3 @@
+- Organize container and component folders similar to jw-footwear
+- Make different transfer types separate components
+- Replace redux devtools hook with the one in jw-footwear

@@ -1,0 +1,26 @@
+.Account-account {
+    display: block;
+    color: black;
+    text-decoration: none;
+    padding: 0 12px;
+}
+
+.Account-account:hover {
+    background-color: #EFEFEF;
+}
+
+.Account-container {
+    border-bottom: 1px solid #BFBFBF;
+    padding: 12px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.Account-account:last-of-type .Account-container{
+    border: none;
+}
+
+.Account-type, .Account-balance {
+    margin-bottom: 5px;
+}

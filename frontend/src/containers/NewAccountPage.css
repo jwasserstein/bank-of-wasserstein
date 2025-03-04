@@ -1,0 +1,31 @@
+.NewAccountPage-message {
+    text-align: center;
+    font-weight: 700;
+    margin-top: 10vh;
+}
+
+.NewAccountPage-radio-container {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.NewAccountPage-radio {
+    margin-left: 15px;
+}
+
+.NewAccountForm-form-btn {
+    margin-top: 10px;
+}
+
+.NewAccountForm-form {
+    width: 90%;
+    margin: 0 auto;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+}
+
+.NewAccountPage-disabled {
+    color: #CBCBCB;
+}

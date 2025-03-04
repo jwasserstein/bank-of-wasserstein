@@ -1,0 +1,23 @@
+.Form-form {
+    width: 90%;
+    margin: 0 auto;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+}
+
+.Form-field {
+    height: 30px;
+    padding-left: 10px;
+    border: 1px solid #000000;
+    border-radius: 7px;
+    margin: 5px 0;
+    font-size: 16px;
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.Form-btn {
+    margin-top: 10px;
+}

@@ -1,0 +1,24 @@
+.Message {
+    width: 90%;
+    max-width: 400px;
+    min-height: 40px;
+    margin: 20px auto;
+    border-radius: 7px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+.Message-red {
+    background-color: #FFCFCF;
+    color: #BC0D0D;
+    border: 1px solid #BC0D0D;
+}
+
+.Message-green {
+    background-color: #A1EB89;
+    color: #2C7712;
+    border: 1px solid #2C7712;
+}

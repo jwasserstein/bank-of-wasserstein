@@ -1,0 +1,39 @@
+.TransactionPage-message {
+    text-align: center;
+    margin: 10vh 0 5px 0;
+}
+
+.TransactionPage-btn-container {
+    display: flex;
+    justify-content: space-between;
+    max-width: 550px;
+    width: 90%;
+    margin: 10px auto;
+}
+
+.TransactionPage-account-type {
+    text-align: center;
+    margin: 0 0 15px 0;
+    font-size: 20px;
+}
+
+.TransactionPage-close-account-container {
+    display: flex;
+    flex-direction: column;
+    margin: auto;
+    width: 90%;
+    max-width: 550px;
+}
+
+.TransactionPage-close-btn {
+    color: black;
+    background-color: #F64545;
+    border: none;
+    margin: 10px 0 40px 0;
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
+
+.TransactionPage-close-btn:hover {
+    background-color: #F56565;
+}

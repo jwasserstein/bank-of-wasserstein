@@ -1,0 +1,21 @@
+.RadioContainer-container {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.RadioContainer-radio {
+    margin-left: 15px;
+}
+
+.RadioContainer-disabled {
+    color: #CBCBCB;
+}
+
+@media (max-width:900px){
+    .RadioContainer-container {
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+    }
+}

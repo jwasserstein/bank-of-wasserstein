@@ -1,0 +1,47 @@
+.NewTransactionForm-form {
+    width: 90%;
+    margin: 0 auto;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+}
+
+.NewTransactionForm-field {
+    height: 30px;
+    padding-left: 10px;
+    border: 1px solid #000000;
+    border-radius: 7px;
+    margin: 5px 0;
+    font-size: 16px;
+}
+
+.NewTransactionForm-form-btn {
+  margin-top: 10px;
+}
+
+.NewTransactionForm-disabled {
+  color: #CBCBCB;
+}
+
+.NewTransactionForm-radio-container {
+  margin-top: 5px;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.NewTransactionForm-radio {
+  margin-left: 15px;
+}
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}

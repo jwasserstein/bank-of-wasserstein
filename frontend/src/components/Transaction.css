@@ -1,0 +1,32 @@
+.Transaction-transaction {
+    padding: 0 12px;
+}
+
+.Transaction-container {
+    border-bottom: 1px solid #BFBFBF;
+    padding: 12px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.Transaction-transaction:last-of-type .Transaction-container{
+    border: none;
+}
+
+.Transaction-recipient, .Transaction-amount {
+    margin-bottom: 5px;
+}
+
+.Transaction-date, .Transaction-balance {
+    font-size: 14px;
+    color: #575757;
+}
+
+.Transaction-amount, .Transaction-balance {
+    text-align: right;
+}
+
+.Transaction-recipient, .Transaction-date {
+    text-align: left;
+}
